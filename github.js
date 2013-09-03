@@ -596,6 +596,21 @@
       };
     };
 
+    Github.Issue = function(options) {
+      var number = options.number
+      var user = options.user;
+      var repo = options.repo;
+      var issuesPath = "/repos/" + user + "/" + repo + "/issues/" + number;
+
+      this.read = function(cb) {
+        _request("GET", issuesPath, null, cb);
+      };
+
+      this.comment = function(message, cb) {
+        _request("POST", issuesPath + "/comments", {body: message}, cb);
+      };
+    };
+
     // Top Level API
     // -------
 
@@ -609,6 +624,10 @@
 
     this.getGist = function(id) {
       return new Github.Gist({id: id});
+    };
+
+    this.getIssue = function(user, repo, number) {
+      return new Github.Issue({user: user, repo: repo, number: number});
     };
   };
 
