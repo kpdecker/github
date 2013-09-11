@@ -609,6 +609,10 @@
       this.comment = function(message, cb) {
         _request("POST", issuesPath + "/comments", {body: message}, cb);
       };
+
+      this.events = function(cb) {
+        _requestAllPages(issuesPath + "/events", cb);
+      };
     };
 
     // Top Level API
