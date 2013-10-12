@@ -301,7 +301,7 @@
           return encodeURIComponent(key) + '=' + encodeURIComponent(value);
         }).join('&');
 
-        _request("GET", repoPath + "/issues" + (params ? "?" + params : ""), null, function(err, issues) {
+        _requestAllPages(repoPath + "/issues" + (params ? "?" + params : ""), function(err, issues) {
           if (err) return cb(err);
           cb(null, issues);
         });
