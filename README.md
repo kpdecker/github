@@ -1,7 +1,9 @@
-[![browser support](https://ci.testling.com/darvin/github.png)](https://ci.testling.com/darvin/github)
+﻿[![browser support](https://ci.testling.com/darvin/github.png)](https://ci.testling.com/darvin/github)
 
 
 [![Build Status](https://travis-ci.org/darvin/github.png?branch=master)](https://travis-ci.org/darvin/github)
+
+[![Coverage Status](https://img.shields.io/coveralls/michael/github.svg)](https://coveralls.io/r/michael/github)
 
 # Github.js
 
@@ -38,6 +40,16 @@ var github = new Github({
 });
 ```
 
+You can use either:
+* Authorised App Tokens (via client/secret pairs), used for bigger applications, created in web-flows/on the fly
+* Personal Access Tokens (simpler to set up), used on command lines, scripts etc, created in GitHub web UI
+
+See these pages for more info:
+
+[Creating an access token for command-line use](https://help.github.com/articles/creating-an-access-token-for-command-line-use)
+
+[Github API OAuth Overview] (http://developer.github.com/v3/oauth)
+
 ## Repository API
 
 
@@ -51,16 +63,28 @@ Show repository information
 repo.show(function(err, repo) {});
 ```
 
-Get contents at a particular path.
+Delete a repository
 
 ```js
-repo.contents("path/to/dir", function(err, contents) {});
+repo.deleteRepo(function(err, res) {});
+```
+
+Get contents at a particular path in a particular branch. Set sync to true to get contents via sync method.
+
+```js
+repo.contents(branch, "path/to/dir", function(err, contents) {}, sync);
 ```
 
 Fork repository. This operation runs asynchronously. You may want to poll for `repo.contents` until the forked repo is ready.
 
 ```js
 repo.fork(function(err) {});
+```
+
+Create new branch for repo. You can omit oldBranchName to default to "master".
+
+```js
+repo.branch(oldBranchName, newBranchName, function(err) {});
 ```
 
 Create Pull Request.
@@ -169,7 +193,13 @@ user.orgs(function(err, orgs) {});
 List authenticated user's gists.
 
 ```js
-user.gists(username, function(err, gists) {});
+user.gists(function(err, gists) {});
+```
+
+List unread notifications for the authenticated user.
+
+```js
+user.notifications(function(err, notifications) {});
 ```
 
 Show user information for a particular username. Also works for organizations.
@@ -183,6 +213,15 @@ List public repositories for a particular user.
 ```js
 user.userRepos(username, function(err, repos) {});
 ```
+
+Create a new repo for the authenticated user
+
+```js
+user.createRepo({"name": "test"}, function(err, res) {});
+```
+Repo description, homepage, private/public can also be set.
+For a full list of options see the docs [here](https://developer.github.com/v3/repos/#create)
+
 
 List repositories for a particular organization. Includes private repositories if you are authorized.
 
@@ -210,7 +249,7 @@ gist.read(function(err, gist) {
 });
 ```
 
-Updating the contents of a Git. Please consult the documentation on [GitHub](http://developer.github.com/v3/gists/). 
+Updating the contents of a Gist. Please consult the documentation on [GitHub](http://developer.github.com/v3/gists/).
 
 ```js
 var delta = {
@@ -231,32 +270,53 @@ var delta = {
 };
 
 gist.update(delta, function(err, gist) {
-  
+
 });
 ```
+## Issues API
 
+```js
+var issues = github.getIssues(username, reponame);
+```
 
-## Tests
+To read all the issues of a given repository
 
-Github.js is automatically™ tested by the users of [Prose](http://prose.io). Because of that, we decided to save some time by not maintaining a test suite. Yes, you heard right. :) However, you can still consider it stable since it is used in production.
+```js
+issues.list(options, function(err, issues) {});
+```
 
 ##Setup
 
 Github.js has the following dependencies:
 
 - Underscore
-- Base64 (for basic auth). You can leave this if you are not using basic auth.
+- btoa (included in modern browsers, an npm module is included in package.json for node)
 
 Include these before github.js :
 
 ```
 <script src="lib/underscore-min.js">
-<script src="lib/base64.js">
 <script src="github.js">
 ```
 
 ## Change Log
 
+### 0.10.X
+
+Create and delete repositories
+
+### 0.9.X
+
+Paging (introduced at tail end of 0.8.X, note: different callbacks for success & errors now)
+
+### 0.8.X
+
+Fixes and tweaks, simpler auth, CI tests, node.js support, Raw+JSON, UTF8, plus:
+Users - follow, unfollow, get info, notifications
+Gists - create
+Issues - get
+Repos - createRepo, deleteRepo, createBranch, star, unstar, isStarred, getCommits, listTags, listPulls, getPull, compare
+Hooks - listHooks, getHook, createHook, editHook, deleteHook
 
 ### 0.7.X
 
@@ -268,7 +328,7 @@ Adds support for organizations and fixes an encoding issue.
 
 ### 0.5.X
 
-Smart caching of latest commit sha. 
+Smart caching of latest commit sha.
 
 ### 0.4.X
 
